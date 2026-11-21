@@ -7,13 +7,15 @@ import type { ApiError, SacramentMeeting } from "@/lib/types";
 export async function GET(
   request: Request,
 ): Promise<Response> {
-  const date = new URL(request.url).searchParams.get("date");
+  const url = new URL(request.url);
+  const date = url.searchParams.get("date");
+  const query = url.searchParams.get("query");
 
   if (date !== null && !isIsoDate(date)) {
     const body: ApiError = { error: "date must be in YYYY-MM-DD format" };
     return Response.json(body, { status: 400 });
   }
 
-  const meetings: SacramentMeeting[] = getMeetings(date ?? undefined);
+  const meetings: SacramentMeeting[] = await getMeetings(date ?? undefined, query ?? undefined);
   return Response.json(meetings);
 }

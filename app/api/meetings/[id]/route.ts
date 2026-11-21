@@ -13,7 +13,7 @@ export async function GET(
     return Response.json(body, { status: 400 });
   }
 
-  const meeting = getMeetingById(Number(id));
+  const meeting = await getMeetingById(Number(id));
   if (!meeting) {
     const body: ApiError = { error: `No meeting found with id ${id}` };
     return Response.json(body, { status: 404 });

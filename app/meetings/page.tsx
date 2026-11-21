@@ -1,27 +1,40 @@
 import type { Metadata } from "next";
 import MeetingCard from "@/components/MeetingCard";
-import { getBaseUrl } from "@/lib/api";
+import MeetingSearch from "@/components/MeetingSearch";
+import Pagination from "@/components/Pagination";
+import { getMeetings } from "@/lib/meetings-db";
 import { getMostRecentSunday } from "@/lib/dates";
-import type { SacramentMeeting } from "@/lib/types";
 
 export const metadata: Metadata = { title: "All Meetings" };
 
-export default async function MeetingsPage() {
-  const baseUrl = await getBaseUrl();
-  const response = await fetch(`${baseUrl}/api/meetings`, { cache: "no-store" });
+const PAGE_SIZE = 5;
 
-  if (!response.ok) {
-    throw new Error(`Failed to load meetings (status ${response.status})`);
-  }
+export default async function MeetingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ query?: string; page?: string }>;
+}) {
+  const params = await searchParams;
+  const query = params.query || "";
+  const pageStr = params.page || "1";
+  const page = Math.max(1, parseInt(pageStr, 10) || 1);
 
-  const meetings = (await response.json()) as SacramentMeeting[];
+  const allMeetings = await getMeetings(undefined, query || undefined);
+
+  const totalMeetings = allMeetings.length;
+  const totalPages = Math.ceil(totalMeetings / PAGE_SIZE) || 1;
+  const startIndex = (page - 1) * PAGE_SIZE;
+  const meetings = allMeetings.slice(startIndex, startIndex + PAGE_SIZE);
   const currentSunday = getMostRecentSunday();
 
   return (
     <div>
       <h1 className="mb-6 text-3xl font-bold">All Meetings</h1>
+
+      <MeetingSearch />
+
       {meetings.length === 0 ? (
-        <p className="text-muted">No meetings have been planned yet.</p>
+        <p className="text-muted">No meetings have been planned yet or match your search.</p>
       ) : (
         <ul className="grid gap-4 sm:grid-cols-2">
           {meetings.map((meeting) => (
@@ -31,6 +44,13 @@ export default async function MeetingsPage() {
           ))}
         </ul>
       )}
+
+      <Pagination
+        totalPages={totalPages}
+        currentPage={page}
+        totalMeetings={totalMeetings}
+        pageSize={PAGE_SIZE}
+      />
     </div>
   );
 }
