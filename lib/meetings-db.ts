@@ -89,9 +89,27 @@ export async function addMeeting(meeting: Omit<SacramentMeeting, "id">): Promise
 }
 
 export async function updateMeeting(id: number, meeting: Partial<SacramentMeeting>): Promise<void> {
-  // Stub for Week 04 forms
+  const sql = getSql();
+  await sql`
+    UPDATE meetings SET
+      date = COALESCE(${meeting.date}, date),
+      meeting_type = COALESCE(${meeting.meetingType}, meeting_type),
+      presiding = COALESCE(${meeting.presiding}, presiding),
+      conducting = COALESCE(${meeting.conducting}, conducting),
+      announcements = COALESCE(${meeting.announcements}, announcements),
+      opening_hymn = COALESCE(${meeting.openingHymn ? JSON.stringify(meeting.openingHymn) : null}::jsonb, opening_hymn),
+      opening_prayer = COALESCE(${meeting.openingPrayer}, opening_prayer),
+      ward_business = COALESCE(${meeting.wardBusiness ? JSON.stringify(meeting.wardBusiness) : null}::jsonb, ward_business),
+      stake_business = COALESCE(${meeting.stakeBusiness ?? null}, stake_business),
+      sacrament_hymn = COALESCE(${meeting.sacramentHymn ? JSON.stringify(meeting.sacramentHymn) : null}::jsonb, sacrament_hymn),
+      speakers = COALESCE(${meeting.speakers ? JSON.stringify(meeting.speakers) : null}::jsonb, speakers),
+      closing_hymn = COALESCE(${meeting.closingHymn ? JSON.stringify(meeting.closingHymn) : null}::jsonb, closing_hymn),
+      closing_prayer = COALESCE(${meeting.closingPrayer}, closing_prayer)
+    WHERE id = ${id};
+  `;
 }
 
 export async function deleteMeeting(id: number): Promise<void> {
-  // Stub for Week 04 forms
+  const sql = getSql();
+  await sql`DELETE FROM meetings WHERE id = ${id}`;
 }

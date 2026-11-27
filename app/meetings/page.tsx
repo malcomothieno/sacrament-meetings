@@ -3,6 +3,7 @@ import MeetingCard from "@/components/MeetingCard";
 import MeetingSearch from "@/components/MeetingSearch";
 import Pagination from "@/components/Pagination";
 import { getMeetings } from "@/lib/meetings-db";
+import Link from "next/link";
 import { getMostRecentSunday } from "@/lib/dates";
 
 export const metadata: Metadata = { title: "All Meetings" };
@@ -29,7 +30,15 @@ export default async function MeetingsPage({
 
   return (
     <div>
-      <h1 className="mb-6 text-3xl font-bold">All Meetings</h1>
+      <div className="mb-6 flex items-center justify-between">
+      <h1 className="text-3xl font-bold">All Meetings</h1>
+      <Link
+        href="/meetings/create"
+        className="rounded bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark"
+      >
+        Create New Meeting
+      </Link>
+    </div>
 
       <MeetingSearch />
 

@@ -5,6 +5,7 @@ import NavLinks, { type NavLinkItem } from "./NavLinks";
 const links: NavLinkItem[] = [
   { href: "/", label: "Home", exact: true },
   { href: "/meetings", label: "Meetings" },
+  { href: "/meetings/create", label: "New Meeting" },
 ];
 
 export default function Header() {

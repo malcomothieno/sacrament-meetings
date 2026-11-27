@@ -2,8 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import MeetingDetail from "@/components/MeetingDetail";
 import PrintButton from "@/components/PrintButton";
-import { getBaseUrl } from "@/lib/api";
-import type { SacramentMeeting } from "@/lib/types";
+import { getMeetingById } from "@/lib/meetings-db";
+import DeleteMeetingButton from "@/components/DeleteMeetingButton";
 
 export default async function MeetingPage({
   params,
@@ -11,18 +11,11 @@ export default async function MeetingPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const baseUrl = await getBaseUrl();
-  const response = await fetch(`${baseUrl}/api/meetings/${encodeURIComponent(id)}`, {
-    cache: "no-store",
-  });
+  const numericId = Number(id);
+  if (isNaN(numericId)) notFound();
 
-  // 400 (bad id) and 404 (missing) both mean there is no such meeting page.
-  if (response.status === 400 || response.status === 404) notFound();
-  if (!response.ok) {
-    throw new Error(`Failed to load meeting (status ${response.status})`);
-  }
-
-  const meeting = (await response.json()) as SacramentMeeting;
+  const meeting = await getMeetingById(numericId);
+  if (!meeting) notFound();
 
   return (
     <div>
@@ -30,7 +23,16 @@ export default async function MeetingPage({
         <Link href="/meetings" className="font-semibold text-brand underline">
           &larr; Back to all meetings
         </Link>
-        <PrintButton />
+        <div className="flex items-center gap-3">
+          <Link
+            href={`/meetings/${id}/edit`}
+            className="rounded bg-brand px-3 py-1 text-sm font-semibold text-white hover:bg-brand-dark"
+          >
+            Edit Meeting
+          </Link>
+          <DeleteMeetingButton id={meeting.id} />
+          <PrintButton />
+        </div>
       </div>
       <MeetingDetail meeting={meeting} />
     </div>
